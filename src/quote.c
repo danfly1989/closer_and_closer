@@ -158,19 +158,22 @@ void	ft_detect_quote_type(char *token, int *quote_type)
 	}
 }
 
-/*
- * Skip over a quoted region
- */
 int	ft_skip_quote(char *str, int i)
 {
-	char quote;
+	char	q;
 
-	if (!str)
+	if (!str || (str[i] != '\'' && str[i] != '"'))
 		return (i);
-	quote = str[i++];
-	while (str[i] && str[i] != quote)
-		i++;
-	if (str[i])
-		i++;
+	q = str[i];
+	i++; /* skip opening quote */
+	while (str[i] && str[i] != q)
+	{
+		if (q == '"' && str[i] == '\\' && str[i + 1])
+			i += 2; /* allow \" or escaped char inside double quotes */
+		else
+			i++;
+	}
+	if (str[i] == q)
+		i++; /* skip closing quote */
 	return (i);
 }

@@ -26,10 +26,9 @@ int	ft_count_tokens(char *str)
 		if (!str[i])
 			break ;
 		count++;
-		if (str[i] == '\'' || str[i] == '"')
-			i = ft_skip_quote(str, i);
-		else
-			i = ft_skip_token(str, i);
+		/* let ft_skip_token handle quoted
+			+ unquoted parts inside a single token */
+		i = ft_skip_token(str, i);
 	}
 	return (count);
 }
