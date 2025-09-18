@@ -82,9 +82,6 @@ void	ft_nested_child(t_dat *d, char **cmd, char *cmd_path, int s_stdin)
 	execve(cmd_path, cmd, d->evs);
 	exit(1);
 }
-
-// The  1st message here will occur in the case of a child
-// of a child (grandchild) terminating due to SIGQUIT
 void	ft_wait_children(int tot)
 {
 	int	status;
@@ -100,7 +97,8 @@ void	ft_wait_children(int tot)
 			signal_num = WTERMSIG(status);
 			if (signal_num == SIGQUIT)
 			{
-				(printf("grandchild core dumped\n"), g_last_exit_status = 131);
+				printf("grandchild core dumped\n");
+				g_last_exit_status = 131;
 			}
 			else if (signal_num == SIGINT)
 			{
@@ -109,7 +107,11 @@ void	ft_wait_children(int tot)
 			}
 		}
 		else if (WIFEXITED(status))
-			g_last_exit_status = WEXITSTATUS(status);
+		{
+			// Only set exit status for the last child (last command in pipeline)
+			if (i == tot - 1)
+				g_last_exit_status = WEXITSTATUS(status);
+		}
 		i++;
 	}
 }
