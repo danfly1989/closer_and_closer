@@ -12,6 +12,33 @@
 
 #include "minishell.h"
 
+int	ft_validate_quotes(const char *str)
+{
+	int		i;
+	char	in_quote;
+
+	i = 0;
+	in_quote = 0;
+	while (str[i])
+	{
+		if (!in_quote && (str[i] == '\'' || str[i] == '"'))
+		{
+			in_quote = str[i];
+		}
+		else if (in_quote && str[i] == in_quote)
+		{
+			in_quote = 0;
+		}
+		i++;
+	}
+	if (in_quote != 0)
+	{
+		write(2, "minishell: syntax error: unmatched quote\n", 41);
+		return (0); // Error - unmatched quote
+	}
+	return (1); // OK - all quotes matched
+}
+
 /*
  * Remove empty strings from d->xln
  */
@@ -160,12 +187,16 @@ void	ft_detect_quote_type(char *token, int *quote_type)
 
 int	ft_skip_quote(char *str, int i)
 {
-	char	q;
+	char q;
+	int start;
 
 	if (!str || (str[i] != '\'' && str[i] != '"'))
 		return (i);
+
 	q = str[i];
+	start = i;
 	i++; /* skip opening quote */
+
 	while (str[i] && str[i] != q)
 	{
 		if (q == '"' && str[i] == '\\' && str[i + 1])
@@ -173,7 +204,14 @@ int	ft_skip_quote(char *str, int i)
 		else
 			i++;
 	}
-	if (str[i] == q)
-		i++; /* skip closing quote */
-	return (i);
+
+	if (str[i] != q)
+	{
+		// Unmatched quote detected
+		write(2, "minishell: syntax error: unmatched quote\n", 41);
+
+		return (-1); // Error indicator
+	}
+
+	return (i + 1); /* return index after closing quote */
 }

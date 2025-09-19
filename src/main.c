@@ -1,23 +1,11 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: daflynn <daflynn@student.42berlin.de>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/13 20:22:41 by daflynn           #+#    #+#             */
-/*   Updated: 2025/09/13 20:22:49 by daflynn          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
 
 volatile sig_atomic_t	g_last_exit_status = 0;
 
 int	main(int argc, char *argv[], char *env[])
 {
-	char	*line;
-	t_dat	data;
+	char *line;
+	t_dat data;
 
 	data = ft_duplicate_input_args(argc, argv, env);
 	ft_set_main_signals();
@@ -30,6 +18,15 @@ int	main(int argc, char *argv[], char *env[])
 				write(1, "exit\n", 5);
 			break ;
 		}
+
+		// Add quote validation here
+		if (!ft_validate_quotes(line))
+		{
+			g_last_exit_status = 2; // Set syntax error exit code
+			free(line);
+			continue ; // Skip processing this line
+		}
+
 		if (line && *line && !ft_strisspace(line) && ft_strcmp(line, "<<"))
 			add_history(line);
 		if (line && *line && !ft_strisspace(line))
