@@ -268,5 +268,5 @@ void							ft_wait_children(pid_t *pids, int tot,
 									int last_index);
 pid_t							*ft_fork_children(t_dat *d, char ***cmd,
 									int **fd);
-;
+int								is_special_char(char c);
 #endif

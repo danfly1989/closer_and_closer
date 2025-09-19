@@ -14,11 +14,13 @@
 
 int	ft_count_tokens(char *str)
 {
-	int	i;
 	int	count;
+	int	i;
+	int	in_quotes;
 
-	i = 0;
 	count = 0;
+	i = 0;
+	in_quotes = 0;
 	while (str[i])
 	{
 		while (str[i] == ' ')
@@ -26,8 +28,16 @@ int	ft_count_tokens(char *str)
 		if (!str[i])
 			break ;
 		count++;
-		/* let ft_skip_token handle quoted
-			+ unquoted parts inside a single token */
+		// Handle special characters
+		if (is_special_char(str[i]) && (i == 0 || str[i - 1] != '\\'))
+		{
+			if (str[i] == '>' && str[i + 1] == '>')
+				i += 2;
+			else
+				i += 1;
+			continue ;
+		}
+		// Handle regular tokens
 		i = ft_skip_token(str, i);
 	}
 	return (count);
