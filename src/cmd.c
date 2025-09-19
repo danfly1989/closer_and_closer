@@ -14,9 +14,9 @@
 
 char	*ft_get_cmd_path_nested(const char *cmd)
 {
-	if (access(cmd, X_OK) == 0)
-		return (ft_strdup(cmd));
-	return (NULL);
+	// For direct paths (./file or /file), always return the path
+	// Let ft_exec_command() handle the permission/existence checks
+	return (ft_strdup(cmd));
 }
 
 char	*ft_get_cmd_path(t_dat *d, const char *cmd, int i)
