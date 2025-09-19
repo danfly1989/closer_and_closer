@@ -12,10 +12,26 @@
 
 #include "minishell.h"
 
+// Modified ft_execute_pipeline to use PID array and find last index
 void	ft_execute_pipeline(t_dat *d, char ***cmd)
 {
-	int	**fd;
+	int		**fd;
+	pid_t	*pids;
+	int		last_index;
+	int		i;
 
+	// Find last non-empty command index
+	last_index = -1;
+	for (i = d->tot - 1; i >= 0; i--)
+	{
+		if (cmd[i] && cmd[i][0])
+		{
+			last_index = i;
+			break ;
+		}
+	}
+	if (last_index == -1)
+		return ;
 	if (ft_strcmp(cmd[0][0], "./minishell") == 0)
 	{
 		ft_nested_minishell(d, cmd[0], NULL);
@@ -28,11 +44,12 @@ void	ft_execute_pipeline(t_dat *d, char ***cmd)
 			ft_free_fd(fd);
 		return ;
 	}
-	ft_fork_children(d, cmd, fd);
+	pids = ft_fork_children(d, cmd, fd);
 	ft_close_pipes(fd, d->tot);
-	ft_wait_children(d->tot);
+	ft_wait_children(pids, d->tot, last_index);
 	ft_set_main_signals();
 	ft_free_fd(fd);
+	free(pids);
 }
 
 void	ft_exec_command(t_dat *d, char **cmd)

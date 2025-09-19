@@ -45,27 +45,58 @@ void	ft_child_process(t_dat *d, char ***cmd, int **fd, size_t i)
 	ft_exec_command(d, cmd[i]);
 }
 
-void	ft_fork_children(t_dat *d, char ***cmd, int **fd)
+// Modified ft_fork_children to return array of PIDs
+pid_t	*ft_fork_children(t_dat *d, char ***cmd, int **fd)
 {
-	pid_t	pid;
+	pid_t	*pids;
 	size_t	i;
 
+	pids = malloc(sizeof(pid_t) * d->tot);
+	if (!pids)
+		return (NULL);
 	i = 0;
 	while (i < d->tot)
 	{
+		pids[i] = -1;
 		if (!cmd[i] || !cmd[i][0])
 		{
 			i++;
 			continue ;
 		}
-		pid = fork();
-		if (pid == 0)
+		pids[i] = fork();
+		if (pids[i] == 0)
 		{
 			ft_set_child_signals();
 			ft_child_process(d, cmd, fd, i);
 		}
-		else if (pid < 0)
+		else if (pids[i] < 0)
 			perror("fork");
+		i++;
+	}
+	return (pids);
+}
+
+// Modified ft_wait_children to handle last command specifically
+void	ft_wait_children(pid_t *pids, int tot, int last_index)
+{
+	int		status;
+	int		i;
+	pid_t	pid;
+
+	i = 0;
+	while (i < tot)
+	{
+		if (pids[i] != -1)
+		{
+			pid = waitpid(pids[i], &status, 0);
+			if (pid == pids[last_index])
+			{
+				if (WIFEXITED(status))
+					g_last_exit_status = WEXITSTATUS(status);
+				else if (WIFSIGNALED(status))
+					g_last_exit_status = 128 + WTERMSIG(status);
+			}
+		}
 		i++;
 	}
 }
@@ -81,40 +112,4 @@ void	ft_nested_child(t_dat *d, char **cmd, char *cmd_path, int s_stdin)
 	}
 	execve(cmd_path, cmd, d->evs);
 	exit(1);
-}
-void	ft_wait_children(int tot)
-{
-	int status;
-	int i;
-	int signal_num;
-	int last_exit_status = 0; // Add this variable
-
-	i = 0;
-	while (i < tot)
-	{
-		waitpid(-1, &status, 0);
-		if (WIFSIGNALED(status))
-		{
-			signal_num = WTERMSIG(status);
-			if (signal_num == SIGQUIT)
-			{
-				printf("grandchild core dumped\n");
-				last_exit_status = 131; // Store instead of setting global
-			}
-			else if (signal_num == SIGINT)
-			{
-				write(1, "\n", 1);
-				last_exit_status = 130; // Store instead of setting global
-			}
-		}
-		else if (WIFEXITED(status))
-		{
-			// Always store the exit status of the last process
-			last_exit_status = WEXITSTATUS(status);
-		}
-		i++;
-	}
-
-	// Set the global exit status only once at the end
-	g_last_exit_status = last_exit_status;
 }
