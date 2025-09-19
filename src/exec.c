@@ -6,13 +6,14 @@
 /*   By: daflynn <daflynn@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 12:14:06 by daflynn           #+#    #+#             */
-/*   Updated: 2025/09/16 12:14:14 by daflynn          ###   ########.fr       */
+/*   Updated: 2025/09/19 16:00:00 by daflynn          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <dirent.h>
+#include <unistd.h>
 
-// Modified ft_execute_pipeline to use PID array and find last index
 void	ft_execute_pipeline(t_dat *d, char ***cmd)
 {
 	int		**fd;
@@ -55,16 +56,13 @@ void	ft_execute_pipeline(t_dat *d, char ***cmd)
 void	ft_exec_command(t_dat *d, char **cmd)
 {
 	char	*cmd_path;
+	DIR		*dir;
 
 	if (!cmd || !cmd[0])
 		exit(127);
 	// Special case: export in a pipeline should be a no-op in child
 	if (ft_strcmp(cmd[0], "export") == 0)
-	{
-		// In a pipeline, export should have been handled by parent
-		// Just exit successfully to avoid "command not found" errors
 		exit(0);
-	}
 	if (ft_is_pipe_builtin(cmd[0]))
 	{
 		ft_execute_builtin_in_child(d, cmd);
@@ -78,6 +76,34 @@ void	ft_exec_command(t_dat *d, char **cmd)
 		ft_putendl_fd(": command not found", 2);
 		exit(127);
 	}
+	// ---------------- 42-compliant pre-execve checks ----------------
+	dir = opendir(cmd_path);
+	if (dir)
+	{
+		closedir(dir);
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(cmd_path, 2);
+		ft_putendl_fd(": Is a directory", 2);
+		free(cmd_path);
+		exit(126);
+	}
+	if (access(cmd_path, F_OK) != 0)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(cmd_path, 2);
+		ft_putendl_fd(": No such file or directory", 2);
+		free(cmd_path);
+		exit(127);
+	}
+	if (access(cmd_path, X_OK) != 0)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(cmd_path, 2);
+		ft_putendl_fd(": Permission denied", 2);
+		free(cmd_path);
+		exit(126);
+	}
+	// -----------------------------------------------------------------
 	execve(cmd_path, cmd, d->evs);
 	free(cmd_path);
 	perror("execve");
@@ -86,7 +112,7 @@ void	ft_exec_command(t_dat *d, char **cmd)
 
 void	ft_external_functions(t_dat *data, char *line)
 {
-	char ***cmd;
+	char	***cmd;
 
 	(void)line;
 	if (!data || !data->xln || !data->xln[0])
