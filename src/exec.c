@@ -41,6 +41,13 @@ void	ft_exec_command(t_dat *d, char **cmd)
 
 	if (!cmd || !cmd[0])
 		exit(127);
+	// Special case: export in a pipeline should be a no-op in child
+	if (ft_strcmp(cmd[0], "export") == 0)
+	{
+		// In a pipeline, export should have been handled by parent
+		// Just exit successfully to avoid "command not found" errors
+		exit(0);
+	}
 	if (ft_is_pipe_builtin(cmd[0]))
 	{
 		ft_execute_builtin_in_child(d, cmd);
@@ -62,7 +69,7 @@ void	ft_exec_command(t_dat *d, char **cmd)
 
 void	ft_external_functions(t_dat *data, char *line)
 {
-	char	***cmd;
+	char ***cmd;
 
 	(void)line;
 	if (!data || !data->xln || !data->xln[0])

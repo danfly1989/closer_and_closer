@@ -243,8 +243,7 @@ void							ft_ex_single_cmd_child(t_dat *d, char *cmd_path,
 									int saved_stdin);
 void							ft_nullify_pointers(t_dat *data);
 void							ft_free_lines(t_dat *data);
-void							ft_check_var_assign_and_expand_line_ext(
-									t_dat *data,
+void							ft_check_var_assign_and_expand_line_ext(t_dat *data,
 									char *line);
 void							ft_cmd_error(t_dat *data, char *line);
 int								ft_is_interactive(void);

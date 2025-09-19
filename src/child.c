@@ -84,9 +84,10 @@ void	ft_nested_child(t_dat *d, char **cmd, char *cmd_path, int s_stdin)
 }
 void	ft_wait_children(int tot)
 {
-	int	status;
-	int	i;
-	int	signal_num;
+	int status;
+	int i;
+	int signal_num;
+	int last_exit_status = 0; // Add this variable
 
 	i = 0;
 	while (i < tot)
@@ -98,20 +99,22 @@ void	ft_wait_children(int tot)
 			if (signal_num == SIGQUIT)
 			{
 				printf("grandchild core dumped\n");
-				g_last_exit_status = 131;
+				last_exit_status = 131; // Store instead of setting global
 			}
 			else if (signal_num == SIGINT)
 			{
 				write(1, "\n", 1);
-				g_last_exit_status = 130;
+				last_exit_status = 130; // Store instead of setting global
 			}
 		}
 		else if (WIFEXITED(status))
 		{
-			// Only set exit status for the last child (last command in pipeline)
-			if (i == tot - 1)
-				g_last_exit_status = WEXITSTATUS(status);
+			// Always store the exit status of the last process
+			last_exit_status = WEXITSTATUS(status);
 		}
 		i++;
 	}
+
+	// Set the global exit status only once at the end
+	g_last_exit_status = last_exit_status;
 }

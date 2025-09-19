@@ -4,7 +4,7 @@ LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 SRC_MINISHELL = \
-	src/minishell.c src/heredoc.c src/util.c src/util2.c src/signal.c src/token.c src/update.c src/builtin.c src/child.c src/redir.c src/exit.c src/pipe.c src/main.c src/global.c src/dir.c src/parent.c src/shell_lvl.c src/free.c src/check.c src/syntax.c src/sigint.c src/var.c src/quote.c src/count.c src/extract.c src/merge.c src/expand.c src/export.c src/env.c src/duplicate.c src/list.c src/cmd.c src/parse.c src/clean.c src/exec.c src/remove.c
+	src/minishell.c src/heredoc.c src/util.c src/util2.c src/signal.c src/token.c src/update.c src/builtin.c src/child.c src/redir.c src/exit.c src/pipe.c src/main.c src/global.c src/dir.c src/parent.c src/shell_lvl.c src/free.c src/check.c src/syntax.c src/sigint.c src/var.c src/quote.c src/count.c src/extract.c src/merge.c src/expand.c src/export.c src/env.c src/duplicate.c src/list.c src/cmd.c src/parse.c src/clean.c src/exec.c src/remove.c 
 
 OBJ_MINISHELL = $(SRC_MINISHELL:.c=.o)
 
