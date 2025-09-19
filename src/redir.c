@@ -145,22 +145,25 @@ int	ft_redir_out(char *file)
 		{
 			fprintf(stderr, "minishell: %s: Permission denied\n", file);
 		}
+		else if (errno == ENOENT)
+		{
+			fprintf(stderr, "minishell: %s: No such file or directory\n", file);
+		}
 		else
 		{
-			perror(file);
+			perror("minishell");
 		}
 		return (0);
 	}
 	if (dup2(fd, STDOUT_FILENO) < 0)
 	{
-		perror("dup2 out");
+		perror("minishell");
 		close(fd);
 		return (0);
 	}
 	close(fd);
 	return (1);
 }
-
 int	ft_redir_append(char *file)
 {
 	int	fd;

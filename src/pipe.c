@@ -58,7 +58,9 @@ void	ft_close_pipes(int **fd, int tot)
 
 int	ft_check_pipe(char **tokens, int i)
 {
-	if (i == 0 || !tokens[i + 1] || ft_is_redirection(tokens[i + 1]))
-		return (ft_syntax_error(tokens[i + 1]));
+	if (i == 0 || tokens[i + 1] == NULL)
+		return (ft_syntax_error_msg(tokens[i]));
+	if (ft_strcmp(tokens[i + 1], "|") == 0)
+		return (ft_syntax_error_msg(tokens[i + 1]));
 	return (1);
 }
